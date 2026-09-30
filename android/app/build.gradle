@@ -6,12 +6,21 @@ plugins {
 
 android {
     namespace "com.example.my_sales_app"
-    compileSdkVersion 34
+    compileSdk 34
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 
     defaultConfig {
         applicationId "com.example.my_sales_app"
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdk 21
+        targetSdk 34
         versionCode 1
         versionName "1.0"
     }
@@ -24,5 +33,5 @@ android {
 }
 
 flutter {
-    source '../..'
+    source "../.."
 }
