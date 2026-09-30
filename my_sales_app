@@ -1,0 +1,266 @@
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+void main() {
+  runApp(const SalesAndRechargeApp());
+}
+
+class SalesAndRechargeApp extends StatefulWidget {
+  const SalesAndRechargeApp({super.key});
+
+  @override
+  State<SalesAndRechargeApp> createState() => _SalesAndRechargeAppState();
+}
+
+class _SalesAndRechargeAppState extends State<SalesAndRechargeApp> {
+  // التحكم في اللغة الحالية (ar للعربية، en للإنجليزيّة)
+  Locale _currentLocale = const Locale('ar');
+
+  void _toggleLanguage() {
+    setState(() {
+      _currentLocale = _currentLocale.languageCode == 'ar'
+          ? const Locale('en')
+          : const Locale('ar');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Sales & Games Recharge',
+      locale: _currentLocale,
+      supportedLocales: const [
+        Locale('ar'),
+        Locale('en'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        useMaterial3: true,
+      ),
+      home: HomeScreen(
+        onToggleLanguage: _toggleLanguage,
+        currentLanguage: _currentLocale.languageCode,
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  final VoidCallback onToggleLanguage;
+  final String currentLanguage;
+
+  const HomeScreen({
+    super.key,
+    required onToggleLanguage,
+    required currentLanguage,
+  })  : onToggleLanguage = onToggleLanguage,
+        currentLanguage = currentLanguage;
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // البيانات الأولية للتطبيق
+  double userBalance = 1500.00; // الرصيد المتاح
+
+  // قائمة خدمات الألعاب
+  List<Map<String, dynamic>> games = [
+    {
+      "id": 1,
+      "name_ar": "ببجي موبايل (PUBG UC)",
+      "name_en": "PUBG Mobile UC",
+      "price": 10.0,
+      "icon": Icons.sports_esports
+    },
+    {
+      "id": 2,
+      "name_ar": "جواهر فري فاير (Free Fire)",
+      "name_en": "Free Fire Diamonds",
+      "price": 5.0,
+      "icon": Icons.local_fire_department
+    },
+    {
+      "id": 3,
+      "name_ar": "بطاقات روبلوكس (Roblox)",
+      "name_en": "Roblox Gift Card",
+      "price": 15.0,
+      "icon": Icons.games
+    },
+  ];
+
+  // سجل المبيعات
+  List<Map<String, dynamic>> salesHistory = [];
+
+  // تنفيذ عملية شحن/بيع
+  void _processRecharge(String gameName, double price) {
+    final isAr = widget.currentLanguage == 'ar';
+    if (userBalance >= price) {
+      setState(() {
+        userBalance -= price;
+        salesHistory.insert(0, {
+          "title": gameName,
+          "price": price,
+          "date": DateTime.now().toString().substring(0, 16),
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'تم عملية الشحن بنجاح!' : 'Recharge successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isAr ? 'الرصيد غير كافٍ!' : 'Insufficient balance!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool isAr = widget.currentLanguage == 'ar';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isAr ? 'إدارة المبيعات وشحن الألعاب' : 'Sales & Game Top-Up'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: widget.onToggleLanguage,
+            tooltip: isAr ? 'تغيير اللغة' : 'Change Language',
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAlignment.start,
+          children: [
+            // بطاقة الرصيد المالي
+            Card(
+              color: Colors.indigo,
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAlignment.start,
+                      children: [
+                        Text(
+                          isAr ? 'الرصيد المتاح' : 'Available Balance',
+                          style: const TextStyle(color: Colors.white70, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '\$$userBalance',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // مكان إتاحة إضافة رصيد مستقبلاً
+                      },
+                      icon: const Icon(Icons.add),
+                      label: Text(isAr ? 'شحن رصيد' : 'Add Credit'),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // قسم الألعاب
+            Text(
+              isAr ? 'خدمات شحن الألعاب' : 'Game Recharge Services',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: games.length,
+              itemBuilder: (context, index) {
+                final game = games[index];
+                final name = isAr ? game['name_ar'] : game['name_en'];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  child: ListTile(
+                    leading: Icon(game['icon'], color: Colors.indigo, size: 32),
+                    title: Text(name),
+                    subtitle: Text('\$${game['price']}'),
+                    trailing: ElevatedButton(
+                      onPressed: () => _processRecharge(name, game['price']),
+                      child: Text(isAr ? 'شحن' : 'Recharge'),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // قسم سجل المبيعات
+            Text(
+              isAr ? 'سجل العمليات والمبيعات' : 'Sales History',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            salesHistory.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        isAr ? 'لا توجد عمليات مبيعات حتى الآن' : 'No sales record yet',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: salesHistory.length,
+                    itemBuilder: (context, index) {
+                      final sale = salesHistory[index];
+                      return ListTile(
+                        leading: const Icon(Icons.check_circle, color: Colors.green),
+                        title: Text(sale['title']),
+                        subtitle: Text(sale['date']),
+                        trailing: Text(
+                          '-\$${sale['price']}',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+}
